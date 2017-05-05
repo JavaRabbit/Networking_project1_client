@@ -14,8 +14,8 @@ int main(int argc, char * argv[]){
   struct hostent *server;
 
 
-  //portno = atoi(argv[2]);
-  portno = 4000; // 50050
+  portno = atoi(argv[2]);
+  // portno = 4300; // 50050
 
   char buffer[256];
 
@@ -48,11 +48,15 @@ int main(int argc, char * argv[]){
   fgets(buffer, 255, stdin);
   n = write(sockfd, buffer, strlen(buffer));
   
+
+  char response[245];
+  recv(sockfd, response, 44,0);
+
   if(n < 0){
     perror("error reading from socket\n");
   }
 
-  printf("%s\n", buffer);
+  printf("%s\n", response); // used to be buffer
   close(sockfd);
  
 
