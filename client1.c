@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <stdbool.h>
 
 int main(int argc, char * argv[]){
 
@@ -66,25 +67,28 @@ int main(int argc, char * argv[]){
    perror("error conecting cheshire\n");
   } 
 
-  printf("Please enter message:");
-  bzero(buffer, 500);
-  fgets(buffer, 499, stdin);
-  n = write(sockfd, buffer, strlen(buffer));
-  
 
   char response[245];
-  recv(sockfd, response, 44,0);
 
-  if(n < 0){
-    perror("error reading from socket\n");
-  }
+  while(true){
+    printf("Please enter message:");
+    bzero(buffer, 500);
+    bzero(response, 245);
+    fgets(buffer, 499, stdin);
+    n = write(sockfd, buffer, strlen(buffer));
+    printf("gets here %d\n");
 
-  printf("%s\n", response); // used to be buffer
-  close(sockfd);
  
+    recv(sockfd, response, 44,0);
 
+    if(n < 0){
+      perror("error reading from socket\n");
+    }
 
-
+    printf("%s\n", response); // used to be buffer
+  
+  }
+  close(sockfd);
 
   return 0;
 
