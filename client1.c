@@ -9,11 +9,11 @@
 
 int main(int argc, char * argv[]){
 
-  /*
+  
   // a string to get user's handle
   char userHandle[11];
   printf("hello, enter your name:\n");
-  fgets(userHandle, 11, stdin);
+  fgets(userHandle, 10, stdin);
 
   // trim off new line character
   int newLineLocation = strlen(userHandle) - 1;
@@ -21,7 +21,7 @@ int main(int argc, char * argv[]){
 
   // say hi to user
   printf("hi %s\n", userHandle);
- */
+ 
 
   int sockfd, portno, n;
   struct sockaddr_in serv_addr;
