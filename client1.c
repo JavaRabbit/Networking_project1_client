@@ -85,7 +85,10 @@ int main(int argc, char * argv[]){
     // here is where we check if user entered quit
     if(strcmp(buffer, "quit\n") ==0 ){
       printf("you wanted to quit\n");
-      exit(1);
+      // send a message here to the server that you are closing
+      write(sockfd, buffer, strlen(buffer));
+      close(sockfd);
+      exit(0);
     }
 
 
