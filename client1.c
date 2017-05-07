@@ -9,7 +9,13 @@
 
 int main(int argc, char * argv[]){
 
-  
+  // verify the number of arguments to be 3
+  if (argc !=3){
+    printf("Usage example: ./client flip1.engr.oregonstate.edu <port number>\n");
+    exit(1);
+  }  
+
+
   // a string to get user's handle
   char userHandle[11];
   printf("hello, enter your name:\n");
@@ -75,6 +81,14 @@ int main(int argc, char * argv[]){
     bzero(buffer, 500);
     bzero(response, 245);
     fgets(buffer, 499, stdin);
+    
+    // here is where we check if user entered quit
+    if(strcmp(buffer, "quit\n") ==0 ){
+      printf("you wanted to quit\n");
+      exit(1);
+    }
+
+
     n = write(sockfd, buffer, strlen(buffer));
     printf("gets here %d\n");
 
@@ -85,7 +99,8 @@ int main(int argc, char * argv[]){
       perror("error reading from socket\n");
     }
 
-    printf("%s\n", response); // used to be buffer
+
+    printf("%lu %s\n", strlen(response), response); // used to be buffer
   
   }
   close(sockfd);
