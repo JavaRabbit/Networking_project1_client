@@ -53,7 +53,7 @@ int main(int argc, char * argv[]){
    
   server = gethostbyname(argv[1]);
   if(server == NULL){
-    fprintf(stderr, "no such host\n");
+    fprintf(stderr, "No such host was found\n");
     exit(1);
   }
   
@@ -70,7 +70,8 @@ int main(int argc, char * argv[]){
   inet_pton(AF_INET, server, &(serv_addr.sin_addr));
   
   if(connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr))< 0){
-   perror("error conecting cheshire\n");
+   perror("error conecting. Port number on server may not be in use.\n");
+   exit(1);
   } 
 
 
@@ -102,6 +103,13 @@ int main(int argc, char * argv[]){
       perror("error reading from socket\n");
     }
 
+    // check if server said to quit. if so. close this sockfd, tell user, and exit
+    if(strcmp(response, "quit") ==0){
+      printf("server decided to close connection\n");
+      printf("good bye\n");
+      close(sockfd);
+      exit(0);
+    } 
 
     printf("%lu %s\n", strlen(response), response); // used to be buffer
   
