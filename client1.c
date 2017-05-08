@@ -101,6 +101,8 @@ void startUpConnection(int argc, char *argv[]){
 
 
   sockfd=socket(AF_INET, SOCK_STREAM,0);
+  
+  // sets all values in buffer to zero
   bzero(&serv_addr, sizeof serv_addr);
 
   if(sockfd < 0){
@@ -119,9 +121,10 @@ void startUpConnection(int argc, char *argv[]){
   // new line. see added gethostname hosttent
   bcopy(server->h_addr, &(serv_addr.sin_addr.s_addr), server->h_length);
   
-
+  // set struct serv_addr to symbolic constant AF_INET
   serv_addr.sin_family = AF_INET;
   
+  // set the struct serv_addr port number
   serv_addr.sin_port = htons(portno);
 
   inet_pton(AF_INET, server, &(serv_addr.sin_addr));
@@ -150,8 +153,8 @@ void chat(){
 
   // variables to hold string for user message 
   // and server response
-  char response[500];
-  char buffer[500];
+  char response[500]={};
+  char buffer[500]={};
 
   /* While loop will run the send / receive cycle */
   while(true){
@@ -174,12 +177,13 @@ void chat(){
     // variable to contain full string to be sent to server
     // This appends the "user handle" to be sent to the server
     
-    char fullBuffer[511]; 
+    char fullBuffer[511] ={}; 
     bzero(fullBuffer,511);
+
     char greaterThan[] = "> ";
-    strcat(fullBuffer, userHandle);
-    strcat(fullBuffer, greaterThan);
-    strcat(fullBuffer, buffer);
+    strcpy(fullBuffer, userHandle);
+    strcpy(fullBuffer, greaterThan);
+    strcpy(fullBuffer, buffer);
     
     // Send the user message to the server.
     int n = write(sockfd, fullBuffer, strlen(buffer));
