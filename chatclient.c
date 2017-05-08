@@ -159,10 +159,11 @@ void chat(){
   /* While loop will run the send / receive cycle */
   while(true){
     printf("%s>", userHandle);
-    bzero(buffer, 500);
+    //bzero(buffer, 500);
+    buffer[0] ='\0';
     bzero(response, 500);
-    fgets(buffer, 500, stdin);
-    
+    fgets(buffer, 499, stdin);
+   
     // Check  using string compare if user entered quit
     // if so, send message to the server, and exit this client.
     if(strcmp(buffer, "quit\n") ==0 ){
@@ -180,23 +181,22 @@ void chat(){
     // variable to contain full string to be sent to server
     // This appends the "user handle" to be sent to the server
     
-    char buffer1[500]={};
-    char buffer2[1001] = {};
-    char fullBuffer[2100] ={}; 
-    bzero(fullBuffer,2100);
-    bzero(buffer1, 500);
-    bzero(buffer2, 1001);   
+    char fullBuffer[511] ={}; 
+    char buffer2[1000] = {};
+    bzero(fullBuffer,511);
 
-    char greaterThan[] = {"> "};
-    //strcpy(buffer1, userHandle);
-    //strcpy(buffer2, buffer1);
-    //strcat(buffer2, greaterThan);
-    //strcat(fullBuffer, buffer2);
-    //strcat(fullBuffer, buffer);
-    sprintf(fullBuffer, "%s %s %s", userHandle, greaterThan, buffer);
-    
+    /*  append userhandle + ">" + "buffer message" */
+    /*  write this to the server */
+    char greaterThan[] = ">";
+    strcpy(fullBuffer, userHandle);
+    strcat(fullBuffer, greaterThan);
+    strcpy(buffer2, fullBuffer);
+    buffer[strlen(buffer)-1] = '\0';
+    strcat(buffer2, buffer);
+    int pp = strlen(buffer2);   
+    //printf("4 %s is buffer2\n", buffer2);
     // Send the user message to the server.
-    int n = write(sockfd, fullBuffer, strlen(buffer));
+    int n = write(sockfd, buffer2, strlen(buffer2));
    
     // Await server's response 
     recv(sockfd, response, 500, 0);
