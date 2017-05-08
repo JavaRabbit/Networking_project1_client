@@ -11,11 +11,16 @@
 /*  method prototypes */
 void getUserHandle();
 void chat();
-void closeConnection();
+void startUpConnection(int, char* []);
 
 /*  variables */
 char userHandle[11];
-int sockfd;
+
+/* Variables to store socket connection information  */
+struct sockaddr_in serv_addr;
+int sockfd, portno;
+struct hostent *server, *gethostbyname();
+
 
 /* Method to get user handle */
 void getUserHandle(){
@@ -26,13 +31,17 @@ void getUserHandle(){
   int newLineLocation = strlen(userHandle) - 1;
   userHandle[newLineLocation] = '\0';
  
-  // gree the user
+  // greet the user
   printf("Welcome to the chat client %s\n", userHandle);
 }
 
 
 
-
+/* Main method will make a call to get user handle
+ * Then will set up socket connection with server
+ * After connection has been made, main method will
+ * call the chat method to start chat with server
+ */
 
 int main(int argc, char * argv[]){
 
@@ -41,20 +50,43 @@ int main(int argc, char * argv[]){
   if (argc !=3){
     printf("Usage example: ./client flip1.engr.oregonstate.edu <port number>\n");
     exit(1);
-  }  
+  }
 
-  /*  Call method to get user handle */
+  //  start up the connection to the server.
+  startUpConnection(argc, argv);
+
+  // after socket connection variables have been verified, ask user for handle
   getUserHandle();
-
   
-  int  portno;
-  struct sockaddr_in serv_addr;
-  struct hostent *server, *gethostbyname();
+  // initiate the chat between client and server
+  chat();  
 
+} // end main
+
+
+
+
+/* startUpConnection will set up and validate the connection
+ * to the server. It will check that the port number is valid
+ * and the host is valid. 
+ * When completed, it will return to the main method, where
+ * the main method can then call the chat method
+ */
+void startUpConnection(int argc, char *argv[]){
+
+
+  /* Save the port number from the command line 
+   *  If the port number is not valid, show usage
+   *  to user and exit 
+   */
   portno = atoi(argv[2]);
+  if( portno < 256 || portno > 65535){
+    printf("Invalid port number. Please try again from 256- 65535.\n");
+    printf("Usage example:   ./chatclient flip1.engr.oregonstate.edu  50050\n");
+    exit(1);
+  }
 
-  // spec: program should be able to send message up to 500 chars
-  //char buffer[500];  this line moves to chat. remove
+
 
   sockfd=socket(AF_INET, SOCK_STREAM,0);
   bzero(&serv_addr, sizeof serv_addr);
@@ -65,7 +97,7 @@ int main(int argc, char * argv[]){
   }
 
   
-   
+  /* Set the server name as specified by user on command line */   
   server = gethostbyname(argv[1]);
   if(server == NULL){
     fprintf(stderr, "No such host was found\n");
@@ -86,52 +118,71 @@ int main(int argc, char * argv[]){
    perror("error conecting. Port number on server may not be in use.\n");
    exit(1);
   } 
+ 
 
-  // call the chat method to start the chat
-  chat();
-  return 0;
+} // end of startUpMethod
 
 
-} // end of main method
-
+/* Chat method:
+ * The goal of this method is to run a while loop to 
+ * get a message from the user
+ * and send this message to the server.
+ * In addition, this method will wait for the reply
+ * from the server, and display the server reply to the user. 
+ * 
+ * Precondition:  the server connection is set up
+ * The chat will end when either the server or this client
+ * has entered "quit".
+ */
 void chat(){
-  char response[245];
+
+  // variables to hold string for user message 
+  // and server response
+  char response[500];
   char buffer[500];
 
+  /* While loop will run the send / receive cycle */
   while(true){
-    printf("Please enter message:");
+    printf("%s>", userHandle);
     bzero(buffer, 500);
-    bzero(response, 245);
+    bzero(response, 500);
     fgets(buffer, 499, stdin);
     
-    // here is where we check if user entered quit
+    // Check  using string compare if user entered quit
+    // if so, send message to the server, and exit this client.
     if(strcmp(buffer, "quit\n") ==0 ){
-      printf("you wanted to quit\n");
-      // send a message here to the server that you are closing
+      // send a message to the server that you are closing
       write(sockfd, buffer, strlen(buffer));
+      
+      // close this connection, and exit this client application.
       close(sockfd);
       exit(0);
     }
 
-
+    // Send the user message to the server.
     int n = write(sockfd, buffer, strlen(buffer));
+   
+    // Await server's response 
+    recv(sockfd, response, 500, 0);
 
- 
-    recv(sockfd, response, 44,0);
-
+    // verify that no errors occured during socket reading
     if(n < 0){
       perror("error reading from socket\n");
     }
 
-    // check if server said to quit. if so. close this sockfd, tell user, and exit
+    // Check if server has decided to close connection.
+    // Use strcmp using the server response for this check. 
+    // If so,  close this connection, notify user, and exit this application
     if(strcmp(response, "quit") ==0){
-      printf("server decided to close connection\n");
-      printf("good bye\n");
+      printf("Server decided to close connection\n");
+      printf("Now closing this client application.\n");
       close(sockfd);
       exit(0);
     } 
 
-    printf("%lu %s\n", strlen(response), response); // used to be buffer
+    // Otherwise, server did not close the connection, thus
+    // Display the servers response to the client
+    printf("%s\n", response); // used to be buffer
   
   }
   close(sockfd);
