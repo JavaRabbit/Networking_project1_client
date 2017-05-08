@@ -1,3 +1,15 @@
+/**********************************
+ * Project: Networking project 1
+ * Program: Chat client using sockets
+ * Language:  C
+ * Author: Bonnie Kwong
+ * Description:  A chat client that can communicate with a server using 
+ * network sockets.
+ * Date: May 7, 2017
+ * ***********************************/
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>
@@ -22,7 +34,7 @@ int sockfd, portno;
 struct hostent *server, *gethostbyname();
 
 
-/* Method to get user handle */
+/* Function to get user handle */
 void getUserHandle(){
   printf("Please enter your name:\n");
   fgets(userHandle, 10, stdin);
@@ -70,7 +82,7 @@ int main(int argc, char * argv[]){
  * to the server. It will check that the port number is valid
  * and the host is valid. 
  * When completed, it will return to the main method, where
- * the main method can then call the chat method
+ * the main function can then call the chat method
  */
 void startUpConnection(int argc, char *argv[]){
 
@@ -123,8 +135,8 @@ void startUpConnection(int argc, char *argv[]){
 } // end of startUpMethod
 
 
-/* Chat method:
- * The goal of this method is to run a while loop to 
+/* Chat function:
+ * The goal of this function is to run a senc/recv cycle in a  while loop to 
  * get a message from the user
  * and send this message to the server.
  * In addition, this method will wait for the reply
@@ -159,8 +171,18 @@ void chat(){
       exit(0);
     }
 
+    // variable to contain full string to be sent to server
+    // This appends the "user handle" to be sent to the server
+    
+    char fullBuffer[511]; 
+    bzero(fullBuffer,511);
+    char greaterThan[] = "> ";
+    strcat(fullBuffer, userHandle);
+    strcat(fullBuffer, greaterThan);
+    strcat(fullBuffer, buffer);
+    
     // Send the user message to the server.
-    int n = write(sockfd, buffer, strlen(buffer));
+    int n = write(sockfd, fullBuffer, strlen(buffer));
    
     // Await server's response 
     recv(sockfd, response, 500, 0);
